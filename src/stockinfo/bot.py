@@ -12,6 +12,6 @@ from alpaca_trade_api.rest import REST
 alpaca = REST(API_KEY, API_SECRET, BASE_URL)
 
 # Get latest price for AAPL
-def getAPPL():
-    barset = alpaca.get_latest_bar("AAPL")
+def getSPY():
+    barset = alpaca.get_latest_bar("SPY")
     print(barset)
