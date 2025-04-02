@@ -100,7 +100,7 @@ def get_historical_data(
 
 # Example usage
 symbol = "SPY"
-START_DATE = "2024-04-01"
+START_DATE = "2015-04-01"
 END_DATE = "2025-04-02"
 TIMEFRAME = TimeFrame.Minute
 
