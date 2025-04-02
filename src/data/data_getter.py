@@ -15,7 +15,6 @@ BASE_URL = os.getenv("BASE_URL")
 
 alpaca = REST(API_KEY, API_SECRET, BASE_URL)
 
-
 def save_to_csv(data, filename):
     """Save DataFrame to a CSV file, flattening the index."""
     if not data.empty:
@@ -75,28 +74,32 @@ def get_historical_data(symbol, start_date, end_date, chunk_size=1):
         current_start_str = current_start.strftime("%Y-%m-%d")
         current_end_str = current_end.strftime("%Y-%m-%d")
 
+        print("\n" + ("*" * 50))
         try:
-            print(f"Fetching: {current_start_str} to {current_end_str}")
+            print(f"\nFetching: {current_start_str} to {current_start_str}")
             chunk_data = alpaca.get_bars(
                 symbol,
                 timeframe,
                 start=current_start_str,
-                end=current_end_str,
+                end=current_start_str,
                 adjustment="all",
                 limit=10000,
             ).df
+            print("\tTotal Number of Bars Retrieved: " + str(len(chunk_data)))
 
             chunk_data = chunk_data.between_time("9:00", "16:30")
             if not chunk_data.empty:
                 all_data = pd.concat([chunk_data, all_data])
-                print(
-                    f"Fetched {len(chunk_data)} bars of data for {current_start_str} to {current_end_str}"
-                )
-
+                print("\tNumber of Bars between 9:00 & 16:30: " + str(len(chunk_data)))
+                # save_to_csv(
+                #     chunk_data,
+                #     f"src/data/stored_data/{symbol}_current_start_str_{current_start_str}.csv",
+                # )
         except Exception as e:
             print(
-                f"Error fetching data for {current_start_str} to {current_end_str}: {e}"
+                f"\tError fetching data for {current_start_str} to {current_end_str}: {e}"
             )
+        print("\n" + ("+" * 50))
 
         current_end = current_start - timedelta(days=1)
         time.sleep(0.5)
@@ -111,7 +114,7 @@ def get_historical_data(symbol, start_date, end_date, chunk_size=1):
     # Save all collected data to a CSV
     save_to_csv(
         market_hours_data,
-        f"src/data/stored_data/{symbol}_all_data_start_date{start_date}_end_date{end_date}.csv",
+        f"src/data/stored_data/{symbol}_all_data_start_date{start_date.strftime('%Y-%m-%d')}_end_date{end_date.strftime('%Y-%m-%d')}.csv",
     )
 
     print(f"Total data collected: {len(market_hours_data)} records")
