@@ -27,7 +27,7 @@ def save_to_csv(data, filename):
 
 def get_historical_data(symbol, years=1):
     """Fetch historical 1-minute price data for a given symbol using Alpaca API."""
-    end_date = datetime.day()
+    end_date = datetime.today()
     start_date = end_date - timedelta(days=365 * years)
     print(start_date)
 
@@ -83,7 +83,7 @@ def get_historical_data(symbol, years=1):
     market_hours_data = all_data.between_time("9:00", "16:30")
 
     # Save all collected data to a CSV
-    save_to_csv(all_data, f"src/data/stored_data/{symbol}_all_data.csv")
+    save_to_csv(market_hours_data, f"src/data/stored_data/{symbol}_all_data.csv")
     print(f"Total data collected: {len(all_data)} records")
     return all_data
 
