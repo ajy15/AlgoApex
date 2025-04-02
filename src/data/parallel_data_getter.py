@@ -90,8 +90,8 @@ def get_historical_data_parallel(
 
 
 # Example usage
-symbol = "SPY"
-START_DATE = "2024-04-01"
+symbol = "TQQQ"
+START_DATE = "2015-04-01"
 END_DATE = "2025-04-02"
 TIMEFRAME = TimeFrame.Minute
 DIRECTORY_PREFIX = "src/data/stored_data/"
@@ -110,5 +110,5 @@ else:
         END_DATE,
         TIMEFRAME,
         chunk_size=1,
-        max_workers=4,
+        max_workers=6,
     )
