@@ -66,8 +66,8 @@ def get_historical_data(
 
             print(f"\tTotal Number of Bars Retrieved: {len(chunk_data)}")
             if not chunk_data.empty:
-                all_data = pd.concat([chunk_data, all_data])
-                print(f"\tBars retrieved: {len(chunk_data)}")
+                market_hour_data = chunk_data.between_time("9:00", "16:30")
+                all_data = pd.concat([market_hour_data, all_data])
             else:
                 print("\tNo data returned for this date")
 
@@ -91,10 +91,7 @@ def get_historical_data(
             }
         )
         all_data.index = pd.to_datetime(all_data.index)
-        print(f"Total data collected [all_data]: {len(all_data)} records")
-        market_hour_data = all_data.between_time("9:00", "16:30")
-        print(f"Total number of data points in market hours: {len(market_hour_data)}")
-        save_to_csv(market_hour_data, data_filename)
+        save_to_csv(all_data, data_filename)
     else:
         print("No data collected across the entire period")
 
@@ -119,6 +116,7 @@ INVALID_DATES_FILENAME = f"{DIRECTORY_PREFIX}{symbol}_invalid_dates_start_date{S
 if os.path.exists(DATA_FILENAME):
     print(f"Loading data from {DATA_FILENAME}")
     extracted_all_data = pd.read_csv(DATA_FILENAME, index_col=0, parse_dates=True)
+    print("Number of bars in loaded content: " + str(len(extracted_all_data)))
 else:
     print(f"Fetching new data for {symbol}")
     extracted_all_data = get_historical_data(
