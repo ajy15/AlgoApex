@@ -16,13 +16,10 @@ alpaca = REST(API_KEY, API_SECRET, BASE_URL)
 
 
 def save_to_csv(data, filename):
-    """Save DataFrame or list to a CSV file."""
-    if isinstance(data, list) and data:  # Handle list of invalid dates
-        df = pd.DataFrame(data, columns=["invalid_date"])
-        df.to_csv(filename, index=False)
-        print(f"Saved {len(data)} records to {filename}")
-    elif isinstance(data, pd.DataFrame) and not data.empty:
-        data.to_csv(filename, index=True)
+    """Save DataFrame to a CSV file, flattening the index."""
+    if not data.empty:
+        data.reset_index(inplace=True)  # Flatten the index
+        data.to_csv(filename, index=False)
         print(f"Saved {len(data)} records to {filename}")
     else:
         print(f"No data to save for {filename}")
@@ -43,7 +40,7 @@ def get_historical_data(
     all_data = pd.DataFrame()
     current_end = end_date
 
-    while current_end > start_date:
+    while current_end >= start_date:
         current_start = current_end - timedelta(days=chunk_size)
         if current_start < start_date:
             current_start = start_date
@@ -81,6 +78,7 @@ def get_historical_data(
         current_end = current_start - timedelta(days=1)
         time.sleep(0.2)
 
+    # final save
     if not all_data.empty:
         all_data = all_data.sort_index()
         all_data = all_data.astype(
@@ -93,7 +91,10 @@ def get_historical_data(
             }
         )
         all_data.index = pd.to_datetime(all_data.index)
-        save_to_csv(all_data, data_filename)
+        print(f"Total data collected [all_data]: {len(all_data)} records")
+        market_hour_data = all_data.between_time("9:00", "16:30")
+        print(f"Total number of data points in market hours: {len(market_hour_data)}")
+        save_to_csv(market_hour_data, data_filename)
     else:
         print("No data collected across the entire period")
 
@@ -102,8 +103,8 @@ def get_historical_data(
 
 # Example usage
 symbol = "SPY"
-START_DATE = "2024-10-01"
-END_DATE = "2024-10-15"
+START_DATE = "2024-04-01"
+END_DATE = "2025-04-02"
 TIMEFRAME = TimeFrame.Minute
 
 DIRECTORY_PREFIX = "src/data/stored_data/"
@@ -128,7 +129,3 @@ else:
         TIMEFRAME,
         chunk_size=1,
     )
-
-print(f"Total data collected [extracted_all_data]: {len(extracted_all_data)} records")
-market_hour_data = extracted_all_data.between_time("9:00", "16:30")
-print(f"Total number of data points in market hours: {len(market_hour_data)}")
