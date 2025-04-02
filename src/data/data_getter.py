@@ -75,12 +75,12 @@ def get_historical_data(symbol, start_date, end_date, chunk_size=1):
 
         print("\n" + ("*" * 50))
         try:
-            print(f"\nFetching: {current_start_str} to {current_start_str}")
+            print(f"\nFetching: {current_start_str} to {current_end_str}")
             chunk_data = alpaca.get_bars(
                 symbol,
                 timeframe,
                 start=current_start_str,
-                end=current_start_str,
+                end=current_end_str,
                 adjustment="all",
                 limit=10000,
             ).df
