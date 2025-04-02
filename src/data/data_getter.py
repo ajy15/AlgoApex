@@ -26,25 +26,18 @@ def save_to_csv(data, filename):
 
 
 def get_historical_data(symbol, years=1):
-    """Fetch historical 1-minute price data for a given symbol using Alpaca API."""
-    end_date = datetime.now().date()
-    start_date = end_date - timedelta(days=365 * years)
+    """Fetch historical data for a given symbol using Alpaca API."""
+    start_date = datetime(year=2024, month=4, day=1)
+    end_date = datetime.today()  # Use today's date for the end date
     print(start_date)
-    timeframe = TimeFrame.Minute
 
-    # Format dates in RFC3339 format (YYYY-MM-DDTHH:MM:SS)
-    end_date_str = end_date.strftime("%Y-%m-%dT%H:%M:%S")
-    start_date_str = start_date.strftime("%Y-%m-%dT%H:%M:%S")
-
-    print(
-        f"Fetching 1-minute data for {symbol} from {start_date_str} to {end_date_str}"
-    )
+    timeframe = TimeFrame.Minute  # Set timeframe to Day
 
     all_data = pd.DataFrame()
     current_end = end_date
-    chunk_size = 7  # Days per request
+    chunk_size = 1  # Days per request
 
-    while current_end > start_date:
+    while current_end >= start_date:
         current_start = current_end - timedelta(days=chunk_size)
         if current_start < start_date:
             current_start = start_date
@@ -64,30 +57,23 @@ def get_historical_data(symbol, years=1):
                 limit=10000,
             ).df
 
+            chunk_data = chunk_data.between_time("9:00", "16:30")
             if not chunk_data.empty:
                 all_data = pd.concat([chunk_data, all_data])
-                print(f"Fetched {len(chunk_data)} bars")
+                # save_to_csv(
+                #     chunk_data,
+                #     f"src/data/stored_data/{symbol}_{current_start_str}_to_{current_end_str}.csv",
+                # )
+                print(
+                    f"Fetched and saved data for {current_start_str} to {current_end_str}"
+                )
         except Exception as e:
-            print(f"Error fetching data: {e}")
+            print(
+                f"Error fetching data for {current_start_str} to {current_end_str}: {e}"
+            )
 
-        current_end = current_start - timedelta(seconds=1)
+        current_end = current_start - timedelta(days=1)
         time.sleep(0.5)
-
-    if all_data.empty:
-        print("Falling back to daily data...")
-        try:
-            daily_data = alpaca.get_bars(
-                symbol,
-                TimeFrame.Day,
-                start=start_date_str,
-                end=end_date_str,
-                adjustment="all",
-            ).df
-            save_to_csv(daily_data, f"src/data/stored_data/{symbol}_daily_data.csv")
-            return daily_data
-        except Exception as e:
-            print(f"Error fetching daily data: {e}")
-            return pd.DataFrame()
 
     all_data.sort_index(inplace=True)
     for col in ["open", "high", "low", "close"]:
@@ -95,8 +81,9 @@ def get_historical_data(symbol, years=1):
     all_data["volume"] = all_data["volume"].astype("int32")
     all_data.index = pd.to_datetime(all_data.index)
 
-    save_to_csv(all_data, f"src/data/stored_data/{symbol}_1min_data.csv")
-    print(all_data)
+    # Save all collected data to a CSV
+    save_to_csv(all_data, f"src/data/stored_data/{symbol}_all_data.csv")
+    print(f"Total data collected: {len(all_data)} records")
     return all_data
 
 
