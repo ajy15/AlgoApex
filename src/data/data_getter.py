@@ -14,7 +14,6 @@ BASE_URL = os.getenv("BASE_URL")
 
 alpaca = REST(API_KEY, API_SECRET, BASE_URL)
 
-
 def save_to_csv(data, filename):
     """Save DataFrame to a CSV file, flattening the index."""
     if not data.empty:
@@ -25,18 +24,10 @@ def save_to_csv(data, filename):
         print(f"No data to save for {filename}")
 
 
-<<<<<<< HEAD
-def get_historical_data(symbol, years=1):
-    """Fetch historical 1-minute price data for a given symbol using Alpaca API."""
-    end_date = datetime.today()
-    start_date = end_date - timedelta(days=365 * years)
-    print(start_date)
-=======
 def analyze_time_gaps(df):
     """Analyze time gaps between consecutive data points and count gaps per day."""
     # Ensure the index is datetime
     df.index = pd.to_datetime(df.index)
->>>>>>> fe1e24e440b89e7682b5f6ea1b200035a154d793
 
     # Calculate time differences in minutes
     time_diffs = df.index.to_series().diff().dt.total_seconds() / 60
@@ -116,11 +107,6 @@ def get_historical_data(symbol, start_date, end_date, chunk_size=1):
     market_hours_data = all_data.between_time("9:00", "16:30")
 
     # Save all collected data to a CSV
-<<<<<<< HEAD
-    save_to_csv(market_hours_data, f"src/data/stored_data/{symbol}_all_data.csv")
-    print(f"Total data collected: {len(all_data)} records")
-    return all_data
-=======
     save_to_csv(
         market_hours_data,
         f"src/data/stored_data/{symbol}_all_data_start_date{start_date}_end_date{end_date}.csv",
@@ -129,7 +115,6 @@ def get_historical_data(symbol, start_date, end_date, chunk_size=1):
     print(f"Total data collected: {len(market_hours_data)} records")
 
     return market_hours_data
->>>>>>> fe1e24e440b89e7682b5f6ea1b200035a154d793
 
 
 # Example usage
