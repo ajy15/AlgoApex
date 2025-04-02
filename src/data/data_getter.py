@@ -27,8 +27,9 @@ def save_to_csv(data, filename):
 
 def get_historical_data(symbol, years=1):
     """Fetch historical 1-minute price data for a given symbol using Alpaca API."""
-    end_date = datetime.now()
+    end_date = datetime.now().date()
     start_date = end_date - timedelta(days=365 * years)
+    print(start_date)
     timeframe = TimeFrame.Minute
 
     print(
@@ -76,7 +77,7 @@ def get_historical_data(symbol, years=1):
                 end=end_date.strftime("%Y-%m-%d"),
                 adjustment="all",
             ).df
-            save_to_csv(daily_data, f"./stored_data/{symbol}_daily_data.csv")
+            save_to_csv(daily_data, f"src/data/stored_data/{symbol}_daily_data.csv")
             return daily_data
         except Exception as e:
             print(f"Error fetching daily data: {e}")
@@ -86,10 +87,11 @@ def get_historical_data(symbol, years=1):
     for col in ["open", "high", "low", "close"]:
         all_data[col] = all_data[col].astype("float32")
     all_data["volume"] = all_data["volume"].astype("int32")
-    market_hours_data = all_data.between_time("9:30", "16:00")
+    all_data.index = pd.to_datetime(all_data.index)
 
-    save_to_csv(market_hours_data, f"./stored_data/{symbol}_1min_data.csv")
-    return market_hours_data
+    save_to_csv(all_data, f"src/data/stored_data/{symbol}_1min_data.csv")
+    print(all_data)
+    return all_data
 
 
 # Example usage
