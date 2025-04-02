@@ -32,8 +32,12 @@ def get_historical_data(symbol, years=1):
     print(start_date)
     timeframe = TimeFrame.Minute
 
+    # Format dates in RFC3339 format (YYYY-MM-DDTHH:MM:SS)
+    end_date_str = end_date.strftime("%Y-%m-%dT%H:%M:%S")
+    start_date_str = start_date.strftime("%Y-%m-%dT%H:%M:%S")
+
     print(
-        f"Fetching 1-minute data for {symbol} from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
+        f"Fetching 1-minute data for {symbol} from {start_date_str} to {end_date_str}"
     )
 
     all_data = pd.DataFrame()
@@ -45,15 +49,17 @@ def get_historical_data(symbol, years=1):
         if current_start < start_date:
             current_start = start_date
 
+        # Format the chunk start and end dates
+        current_start_str = current_start.strftime("%Y-%m-%d")
+        current_end_str = current_end.strftime("%Y-%m-%d")
+
         try:
-            print(
-                f"Fetching: {current_start.strftime('%Y-%m-%d')} to {current_end.strftime('%Y-%m-%d')}"
-            )
+            print(f"Fetching: {current_start_str} to {current_end_str}")
             chunk_data = alpaca.get_bars(
                 symbol,
                 timeframe,
-                start=current_start,
-                end=current_end,
+                start=current_start_str,
+                end=current_end_str,
                 adjustment="all",
                 limit=10000,
             ).df
@@ -73,8 +79,8 @@ def get_historical_data(symbol, years=1):
             daily_data = alpaca.get_bars(
                 symbol,
                 TimeFrame.Day,
-                start=start_date.strftime("%Y-%m-%d"),
-                end=end_date.strftime("%Y-%m-%d"),
+                start=start_date_str,
+                end=end_date_str,
                 adjustment="all",
             ).df
             save_to_csv(daily_data, f"src/data/stored_data/{symbol}_daily_data.csv")
