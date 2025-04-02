@@ -5,6 +5,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from alpaca_trade_api.rest import REST, TimeFrame
 from dotenv import load_dotenv
+import sys
 
 load_dotenv()
 
