@@ -25,24 +25,60 @@ def save_to_csv(data, filename):
         print(f"No data to save for {filename}")
 
 
+<<<<<<< HEAD
 def get_historical_data(symbol, years=1):
     """Fetch historical 1-minute price data for a given symbol using Alpaca API."""
     end_date = datetime.today()
     start_date = end_date - timedelta(days=365 * years)
     print(start_date)
+=======
+def analyze_time_gaps(df):
+    """Analyze time gaps between consecutive data points and count gaps per day."""
+    # Ensure the index is datetime
+    df.index = pd.to_datetime(df.index)
+>>>>>>> fe1e24e440b89e7682b5f6ea1b200035a154d793
 
-    timeframe = TimeFrame.Minute  # Set timeframe to Day
+    # Calculate time differences in minutes
+    time_diffs = df.index.to_series().diff().dt.total_seconds() / 60
+
+    # Create a DataFrame with dates and time differences
+    gap_analysis = pd.DataFrame({"timestamp": df.index, "time_diff": time_diffs})
+
+    # Group by date and count gaps (where time_diff > 1 minute)
+    gap_analysis["date"] = gap_analysis["timestamp"].dt.date
+    gaps_per_day = gap_analysis[gap_analysis["time_diff"] > 1].groupby("date").size()
+
+    # Create a complete summary including days with no gaps
+    all_dates = pd.date_range(
+        start=df.index.min().date(), end=df.index.max().date(), freq="D"
+    )
+    gap_summary = pd.Series(0, index=all_dates)
+    gap_summary.update(gaps_per_day)
+
+    return gap_summary
+
+
+def get_historical_data(symbol, start_date, end_date, chunk_size=1):
+    """Fetch historical 1-minute price data and analyze time gaps."""
+
+    # Convert string dates to datetime if necessary
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    print(f"Start Date: {start_date}, End Date: {end_date}")
+
+    timeframe = TimeFrame.Minute
 
     all_data = pd.DataFrame()
     current_end = end_date
-    chunk_size = 1  # Days per request
 
     while current_end >= start_date:
         current_start = current_end - timedelta(days=chunk_size)
         if current_start < start_date:
             current_start = start_date
 
-        # Format the chunk start and end dates
         current_start_str = current_start.strftime("%Y-%m-%d")
         current_end_str = current_end.strftime("%Y-%m-%d")
 
@@ -60,13 +96,10 @@ def get_historical_data(symbol, years=1):
             chunk_data = chunk_data.between_time("9:00", "16:30")
             if not chunk_data.empty:
                 all_data = pd.concat([chunk_data, all_data])
-                # save_to_csv(
-                #     chunk_data,
-                #     f"src/data/stored_data/{symbol}_{current_start_str}_to_{current_end_str}.csv",
-                # )
                 print(
-                    f"Fetched and saved data for {current_start_str} to {current_end_str}"
+                    f"Fetched {len(chunk_data)} bars of data for {current_start_str} to {current_end_str}"
                 )
+
         except Exception as e:
             print(
                 f"Error fetching data for {current_start_str} to {current_end_str}: {e}"
@@ -83,11 +116,24 @@ def get_historical_data(symbol, years=1):
     market_hours_data = all_data.between_time("9:00", "16:30")
 
     # Save all collected data to a CSV
+<<<<<<< HEAD
     save_to_csv(market_hours_data, f"src/data/stored_data/{symbol}_all_data.csv")
     print(f"Total data collected: {len(all_data)} records")
     return all_data
+=======
+    save_to_csv(
+        market_hours_data,
+        f"src/data/stored_data/{symbol}_all_data_start_date{start_date}_end_date{end_date}.csv",
+    )
+
+    print(f"Total data collected: {len(market_hours_data)} records")
+
+    return market_hours_data
+>>>>>>> fe1e24e440b89e7682b5f6ea1b200035a154d793
 
 
 # Example usage
 symbol = "SPY"
-data = get_historical_data(symbol, years=1)
+daily_chunk_data = get_historical_data(
+    symbol, start_date="2024-04-01", end_date="2025-04-02", chunk_size=1
+)
