@@ -90,7 +90,7 @@ def get_historical_data_parallel(
 
 
 # Example usage
-symbol = "VTI"
+symbol = "TQQQ"
 START_DATE = "2015-04-01"
 END_DATE = "2025-04-02"
 TIMEFRAME = TimeFrame.Minute
@@ -110,5 +110,5 @@ else:
         END_DATE,
         TIMEFRAME,
         chunk_size=1,
-        max_workers=6,
+        max_workers=6
     )
